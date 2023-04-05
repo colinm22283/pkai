@@ -11,11 +11,11 @@ void PKAI::Network::run(TrainingSet & training_set, int iterations, bool draw, b
     for (int i = 0; i < iterations; i++) {
         training_pair_t & pair = random_values ? training_set.get_random_pair() : training_set.get_next_pair();
 
-        send_inputs(pair.inputs, stream);
+        send_inputs(pair.inputs(), stream);
 
         activate(stream);
 
-        backpropagate(pair.outputs, stream);
+        backpropagate(pair.outputs(), stream);
 
         cudaStreamSynchronize(stream);
 
@@ -30,7 +30,7 @@ void PKAI::Network::run(TrainingSet & training_set, int iterations, bool draw, b
             cudaMemcpy(errors, last_layer, output_size * sizeof(float), cudaMemcpyDeviceToHost);
 
             float correct[output_size];
-            cudaMemcpy(correct, pair.outputs, output_size * sizeof(float), cudaMemcpyDeviceToHost);
+            cudaMemcpy(correct, pair.outputs(), output_size * sizeof(float), cudaMemcpyDeviceToHost);
 
             std::cout << "Correct:";
             for (int i = 0; i < output_size; i++) {

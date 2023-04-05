@@ -1,17 +1,17 @@
 #include <pkai/network.hpp>
 
 __global__
-void give_inputs_k(float ** neurons, float * values, int input_size) {
+void give_inputs_k(float ** neurons, const float * values, int input_size) {
     float * temp = neurons[0];
 
     for (int i = 0; i < input_size; i++) temp[i] = values[i];
 }
 
-void PKAI::Network::send_inputs(float * values) {
+void PKAI::Network::send_inputs(const float * values) {
     give_inputs_k<<<1, 1>>>(neurons, values, layer_sizes[0]);
     cudaDeviceSynchronize();
 }
-void PKAI::Network::send_inputs(float * values, cudaStream_t stream) {
+void PKAI::Network::send_inputs(const float * values, cudaStream_t stream) {
     give_inputs_k<<<1, 1, 0, stream>>>(neurons, values, layer_sizes[0]);
 }
 

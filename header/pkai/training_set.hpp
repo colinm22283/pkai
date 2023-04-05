@@ -9,31 +9,30 @@
 namespace PKAI {
     class training_pair_t {
     protected:
-    public: // TODO: remove
-        float * inputs;
-        float * outputs;
+        float * _inputs;
+        float * _outputs;
 
     public:
         consteval training_pair_t():
-          inputs(nullptr), outputs(nullptr) { }
+            _inputs(nullptr), _outputs(nullptr) { }
 
         template<int input_size, int output_size>
         inline training_pair_t(float (&& _inputs_ref)[input_size], float (&& _outputs_ref)[output_size]):
           training_pair_t(std::move(_inputs_ref), input_size, std::move(_outputs_ref), output_size) { }
 
-        inline training_pair_t(float * _inputs, unsigned long input_size, float * _outputs, unsigned long output_size) {
-            cudaMalloc((void **) &inputs, input_size * sizeof(float));
-            cudaMalloc((void **) &outputs, output_size * sizeof(float));
+        inline training_pair_t(float * __inputs, unsigned long input_size, float * __outputs, unsigned long output_size) {
+            cudaMalloc((void **) &_inputs, input_size * sizeof(float));
+            cudaMalloc((void **) &_outputs, output_size * sizeof(float));
 
             cudaMemcpy(
-                inputs,
                 _inputs,
+                __inputs,
                 input_size * sizeof(float),
                 cudaMemcpyHostToDevice
             );
             cudaMemcpy(
-                outputs,
                 _outputs,
+                __outputs,
                 output_size * sizeof(float),
                 cudaMemcpyHostToDevice
             );
@@ -41,25 +40,28 @@ namespace PKAI {
 
         training_pair_t(training_pair_t &) = delete;
         inline training_pair_t(training_pair_t && old) noexcept:
-          inputs(old.inputs), outputs(old.outputs) {
-            old.inputs = nullptr;
-            old.outputs = nullptr;
+            _inputs(old._inputs), _outputs(old._outputs) {
+            old._inputs = nullptr;
+            old._outputs = nullptr;
         }
 
         training_pair_t & operator=(training_pair_t &) = delete;
         inline training_pair_t & operator=(training_pair_t && old) noexcept {
-            inputs = old.inputs;
-            outputs = old.outputs;
+            _inputs = old._inputs;
+            _outputs = old._outputs;
 
-            old.inputs = nullptr;
-            old.outputs = nullptr;
+            old._inputs = nullptr;
+            old._outputs = nullptr;
 
             return *this;
         }
 
+        constexpr const float * inputs() { return (const float *) _inputs; }
+        constexpr const float * outputs() { return (const float *) _outputs; }
+
         inline ~training_pair_t() {
-            if (inputs) cudaFree(inputs);
-            if (outputs) cudaFree(outputs);
+            if (_inputs) cudaFree(_inputs);
+            if (_outputs) cudaFree(_outputs);
         }
     };
 

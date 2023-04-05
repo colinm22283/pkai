@@ -38,19 +38,19 @@ void PKAI::TrainingSet::save(const char * path) {
     for (training_pair_t & tp : pairs) {
         cudaMemcpy(
             inputs,
-            tp.inputs,
+            tp.inputs(),
             input_size * sizeof(float),
             cudaMemcpyDeviceToHost
         );
         cudaMemcpy(
             outputs,
-            tp.outputs,
+            tp.outputs(),
             output_size * sizeof(float),
             cudaMemcpyDeviceToHost
         );
 
-        fs.write((char *) &inputs, input_size * sizeof(float));
-        fs.write((char *) &outputs, output_size * sizeof(float));
+        fs.write((char *) &inputs, (long) input_size * sizeof(float));
+        fs.write((char *) &outputs, (long) output_size * sizeof(float));
     }
 
     fs.close();

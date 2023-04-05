@@ -76,14 +76,14 @@ namespace PKAI {
         void extract_network_data(float ** _neurons, float ** _synapses, float ** biases);
         void send_network_data(float ** _neurons, float ** _synapses, float ** biases);
 
-        void send_inputs(float * values);
-        void send_inputs(float * values, cudaStream_t stream);
+        void send_inputs(const float * values);
+        void send_inputs(const float * values, cudaStream_t stream);
         void extract_outputs(float * values);
 
         void activate();
         void activate(cudaStream_t stream);
-        void backpropagate(float * correct);
-        void backpropagate(float * correct, cudaStream_t stream);
+        void backpropagate(const float * correct);
+        void backpropagate(const float * correct, cudaStream_t stream);
 
         void print();
 

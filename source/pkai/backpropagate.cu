@@ -19,7 +19,7 @@ __global__
 void copy_corrections(
     float ** neurons,
     float ** costs,
-    float * correct,
+    const float * correct,
     unsigned long final_layer,
     unsigned long layer_size
 ) {
@@ -80,7 +80,7 @@ void backpropagate_k(
     }
 }
 
-void PKAI::Network::backpropagate(float * correct) {
+void PKAI::Network::backpropagate(const float * correct) {
     cudaStream_t stream;
     cudaStreamCreate(&stream);
 
@@ -108,7 +108,7 @@ void PKAI::Network::backpropagate(float * correct) {
     cudaStreamDestroy(stream);
 }
 
-void PKAI::Network::backpropagate(float * correct, cudaStream_t stream) {
+void PKAI::Network::backpropagate(const float * correct, cudaStream_t stream) {
     copy_corrections<<<layer_sizes[layer_count - 1] / PKAI::Config::bp_block_dim + 1, PKAI::Config::bp_block_dim, 0, stream>>>(
         neurons,
         costs,
