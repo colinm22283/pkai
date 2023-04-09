@@ -7,33 +7,32 @@ void give_inputs_k(float ** neurons, const float * values, int input_size) {
     for (int i = 0; i < input_size; i++) temp[i] = values[i];
 }
 
+/// @param values Must be a device pointer
 void PKAI::Network::send_inputs(const float * values) {
     give_inputs_k<<<1, 1>>>(neurons, values, layer_sizes[0]);
     cudaDeviceSynchronize();
 }
+/// @param values Must be a device pointer
 void PKAI::Network::send_inputs(const float * values, cudaStream_t stream) {
     give_inputs_k<<<1, 1, 0, stream>>>(neurons, values, layer_sizes[0]);
 }
 
-
-__global__
-void extract_outputs_k(float ** neurons, float * values, int output_size, int layer_index) {
+/// @param values Must be a host pointer
+void PKAI::Network::extract_outputs(float * values) {
+    cudaMemcpy(
+        values,
+        output_layer,
+        layer_sizes[layer_count - 1] * sizeof(float),
+        cudaMemcpyDeviceToHost
+    );
+}
+/// @param values Must be a host pointer
+void PKAI::Network::extract_outputs(float * values, cudaStream_t stream) {
     cudaMemcpyAsync(
         values,
-        neurons[layer_index],
-        output_size * sizeof(float),
+        output_layer,
+        layer_sizes[layer_count - 1] * sizeof(float),
         cudaMemcpyDeviceToHost,
-        0
+        stream
     );
-
-}
-
-void PKAI::Network::extract_outputs(float * values) {
-    extract_outputs_k<<<1, 1>>>(
-        neurons,
-        values,
-        layer_sizes[layer_count - 1],
-        layer_count - 1
-    );
-    cudaDeviceSynchronize();
 }

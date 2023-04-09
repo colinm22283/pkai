@@ -21,14 +21,26 @@ int main() {
 
     check_cuda_error();
 
-    PKAI::Network network({
+    PKAI::Network network2({
         2,
         10,
         10,
         1
     });
-    network.randomize(2854453934);
+    network2.randomize(2854453934);
     check_cuda_error();
+
+    network2.save("networks/xor.net");
+    check_cuda_error();
+
+    std::cout << "Loading network...\n";
+    PKAI::Network network("networks/xor.net");
+
+    std::cout << "Comparison\n";
+    network2.print();
+    network.print();
+    check_cuda_error();
+    return 0;
 
     std::cout << "Loading training set...\n";
     PKAI::TrainingSet training_set("training_data/xor.ts");
@@ -36,7 +48,7 @@ int main() {
     std::cout << "Training...\n";
 
     auto start_time = std::chrono::high_resolution_clock::now();
-    network.run(training_set, 750000, false, true, false);
+    network.run(training_set, 300000, false, true, false);
     auto end_time = std::chrono::high_resolution_clock::now();
     check_cuda_error();
 

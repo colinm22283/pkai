@@ -33,10 +33,10 @@ void PKAI::Network::run(TrainingSet & training_set, int iterations, bool draw, b
             cudaMemcpy(correct, pair.outputs(), output_size * sizeof(float), cudaMemcpyDeviceToHost);
 
             std::cout << "Correct:";
-            for (int i = 0; i < output_size; i++) {
-                std::cout << " " << correct[i];
+            for (int j = 0; j < output_size; j++) {
+                std::cout << " " << correct[j];
 
-                average_cost += fabs(errors[i] / iterations / output_size);
+                average_cost += fabsf32(errors[j] / (float) iterations / (float) output_size);
             }
             std::cout << "\n\n";
         }
