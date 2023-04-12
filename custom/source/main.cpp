@@ -1,8 +1,13 @@
 #include <iostream>
 #include <chrono>
+#include <fstream>
 
-#include <pkai/network.hpp>
-#include <pkai/training_set.hpp>
+#include "pkai/network.hpp"
+#include "pkai/training_set.hpp"
+
+constexpr unsigned long training_iterations = 51000;
+constexpr const char * network_path = "networks/cifar10.net";
+constexpr const char * dataset_path = "training_data/cifar10.ts";
 
 inline void check_cuda_error() {
     cudaError_t err = cudaGetLastError();
@@ -13,28 +18,28 @@ inline void check_cuda_error() {
     }
 }
 
-#define TRAINING_ITERATIONS 3000000
-
 int main() {
     cudaSetDevice(0);
     cudaDeviceSetLimit(cudaLimitStackSize, 65536);
-    cudaDeviceSetLimit(cudaLimitMallocHeapSize, 65535);
+    cudaDeviceSetLimit(cudaLimitMallocHeapSize, 268431360);
     cudaDeviceSynchronize();
     check_cuda_error();
 
     std::cout << "Loading network...\n";
-    PKAI::Network network("networks/xor.net");
+    PKAI::Network network(network_path);
     check_cuda_error();
 
     std::cout << "Loading training set...\n";
-    PKAI::TrainingSet training_set("training_data/xor.ts");
+    PKAI::TrainingSet training_set(dataset_path);
     check_cuda_error();
 
     std::cout << "Training...\n";
 
     auto start_time = std::chrono::high_resolution_clock::now();
-    network.run(training_set, TRAINING_ITERATIONS, 500, [](PKAI::Network &, unsigned long iteration) {
-        std::cout << iteration << '/' << TRAINING_ITERATIONS << '\n';
+    network.run(training_set, training_iterations, 1000, [](PKAI::Network & network, unsigned long iteration) {
+        std::cout << iteration << '/' << training_iterations << '\n';
+        std::cout << "Saving network...\n";
+        network.save(network_path);
     });
     auto end_time = std::chrono::high_resolution_clock::now();
     check_cuda_error();
@@ -51,19 +56,34 @@ int main() {
     std::cout << "Press enter to continue...\n";
     std::cin.get();
 
-    network.run(training_set, training_set.size(), [](PKAI::Network & network, PKAI::training_pair_t & current_pair, unsigned long iteration) {
-        network.print();
+    network.run(training_set, 50, [](PKAI::Network & network, PKAI::training_pair_t & current_pair, unsigned long iteration) {
+//        network.print();
         float temp[network.layer_sizes[network.layer_count - 1]];
+
+        network.extract_outputs(temp);
+
+        std::cout << "Output: [ ";
+        for (unsigned long i = 0; i < network.layer_sizes[network.layer_count - 1]; i++) {
+            std::cout << temp[i] << " ";
+        }
+        std::cout << "]\n";
+
         current_pair.extract_outputs(temp, network.layer_sizes[network.layer_count - 1]);
 
         std::cout << "Correct: [ ";
         for (unsigned long i = 0; i < network.layer_sizes[network.layer_count - 1]; i++) {
-            std::cout << temp[0] << " ";
+            std::cout << temp[i] << " ";
         }
         std::cout << "]\n";
 
     });
     check_cuda_error();
+
+    std::cout << "Saving network...\n";
+    network.save(network_path);
+    check_cuda_error();
+
+    std::cout << "Done!\n";
 
     return 0;
 }

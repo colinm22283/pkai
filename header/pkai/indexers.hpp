@@ -15,11 +15,11 @@ namespace PKAI {
     static constexpr float & synapse(
         float ** const synapses,
         const unsigned int layer,
-        const unsigned int from_size,
+        const unsigned int to_size,
         const unsigned int from,
         const unsigned int to
     ) {
-        return synapses[layer][from_size * from + to];
+        return synapses[layer][to_size * from + to]; // swapped to and from??????
     }
     __device__
     static constexpr float & cost(

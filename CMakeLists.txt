@@ -14,6 +14,7 @@ include_directories(${CUDA_INCLUDE_DIRS})
 find_package(CUDAToolkit REQUIRED)
 
 include_directories("${PROJECT_SOURCE_DIR}/header/")
+include_directories("${PROJECT_SOURCE_DIR}/custom/header/")
 
 file(GLOB_RECURSE CPP_SOURCES CONFIGURE_DEPENDS "*.cpp")
 list(FILTER CPP_SOURCES EXCLUDE REGEX ".*cmake-build-debug.*")

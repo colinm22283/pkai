@@ -20,19 +20,19 @@ namespace PKAI {
         inline training_pair_t(float (&& _inputs_ref)[input_size], float (&& _outputs_ref)[output_size]):
           training_pair_t(std::move(_inputs_ref), input_size, std::move(_outputs_ref), output_size) { }
 
-        inline training_pair_t(float * __inputs, unsigned long input_size, float * __outputs, unsigned long output_size) {
+        inline training_pair_t(float * _inputs_, unsigned long input_size, float * _outputs_, unsigned long output_size) {
             cudaMalloc((void **) &_inputs, input_size * sizeof(float));
             cudaMalloc((void **) &_outputs, output_size * sizeof(float));
 
             cudaMemcpy(
                 _inputs,
-                __inputs,
+                _inputs_,
                 input_size * sizeof(float),
                 cudaMemcpyHostToDevice
             );
             cudaMemcpy(
                 _outputs,
-                __outputs,
+                _outputs_,
                 output_size * sizeof(float),
                 cudaMemcpyHostToDevice
             );
@@ -40,7 +40,7 @@ namespace PKAI {
 
         training_pair_t(training_pair_t &) = delete;
         inline training_pair_t(training_pair_t && old) noexcept:
-            _inputs(old._inputs), _outputs(old._outputs) {
+          _inputs(old._inputs), _outputs(old._outputs) {
             old._inputs = nullptr;
             old._outputs = nullptr;
         }
@@ -100,7 +100,7 @@ namespace PKAI {
             random_distribution = std::uniform_int_distribution<std::size_t>(0, n - 1);
         }
 
-        TrainingSet(const char * path);
+        explicit TrainingSet(const char * path);
 
         void save(const char * path);
 

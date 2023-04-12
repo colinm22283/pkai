@@ -4,9 +4,6 @@
 #include <pkai/indexers.hpp>
 
 __device__
-inline float make_nonzero(float x) { x == 0 ? (signbit(x) ? -1.0f : 1.0f) * 1.000000001f : x; }
-
-__device__
 inline float error_function(float output, float expected) {
     float temp = (expected - output) * 0.5;
 
@@ -51,7 +48,7 @@ void backpropagate_k(
 
     if (layer == 0) {
         for (int i = 0; i < to_size; i++) {
-            PKAI::synapse(synapses, layer, layer_size, idx, i) +=
+            PKAI::synapse(synapses, layer, to_size, idx, i) += // swapped idx and i
                 PKAI::cost(costs, layer + 1, i) * // to cost
                 PKAI::neuron(neurons, layer, idx) * // from neuron
                 PKAI::Config::learning_rate;
@@ -64,7 +61,7 @@ void backpropagate_k(
         PKAI::cost(costs, layer, idx) = 0;
 
         for (int i = 0; i < to_size; i++) {
-            PKAI::synapse(synapses, layer, layer_size, idx, i) +=
+            PKAI::synapse(synapses, layer, to_size, idx, i) +=
                 PKAI::cost(costs, layer + 1, i) * // to cost
                 PKAI::neuron(neurons, layer, idx) * // from neuron
                 PKAI::Config::learning_rate;
@@ -75,7 +72,7 @@ void backpropagate_k(
 
             PKAI::cost(costs, layer, idx) -=
                 PKAI::cost(costs, layer + 1, i) * // to cost
-                PKAI::synapse(synapses, layer, layer_size, idx, i); // intermediate weight
+                PKAI::synapse(synapses, layer, to_size, idx, i); // intermediate weight
         }
     }
 }

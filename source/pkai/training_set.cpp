@@ -1,9 +1,12 @@
 #include <fstream>
+#include <stdexcept>
 
 #include <pkai/training_set.hpp>
 
 PKAI::TrainingSet::TrainingSet(const char * path) {
     std::ifstream fs(path);
+
+    if (!fs.is_open()) throw std::runtime_error("File not found");
 
     fs.read((char *) &input_size, sizeof(unsigned long));
     fs.read((char *) &output_size, sizeof(unsigned long));
@@ -12,8 +15,8 @@ PKAI::TrainingSet::TrainingSet(const char * path) {
     float outputs[output_size];
 
     while (true) {
-        fs.read((char *) inputs, input_size * sizeof(float));
-        fs.read((char *) outputs, output_size * sizeof(float));
+        if (!fs.read((char *) inputs, input_size * sizeof(float))) break;;
+        if (!fs.read((char *) outputs, output_size * sizeof(float))) break;
 
         if (fs.eof()) break;
 
