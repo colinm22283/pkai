@@ -13,7 +13,7 @@ namespace PKAI {
         float ** costs;
         float ** biases;
 
-        float * output_layer;
+        float * output_layer; // not unique
 
         inline void device_allocate() {
             cudaMalloc((void **) &neurons, layer_count * sizeof(float *));
@@ -66,7 +66,6 @@ namespace PKAI {
         Network(Network &&) = delete;
 
         inline ~Network() {
-            std::cout << "Dealloc\n";
             free_device_2d_array(neurons, layer_count);
             free_device_2d_array(synapses, layer_count - 1);
             free_device_2d_array(costs, layer_count - 1);
@@ -94,7 +93,21 @@ namespace PKAI {
 
         void print();
 
-        void run(TrainingSet & training_set, int iterations, bool draw, bool progress_checks, bool random_values);
+        void run(
+            TrainingSet & training_set,
+            unsigned long iterations
+        );
+        void run(
+            TrainingSet & training_set,
+            unsigned long iterations,
+            unsigned long progress_interval,
+            void(progress_callback)(Network & network, unsigned long current_iteration)
+        );
+        void run(
+            TrainingSet & training_set,
+            unsigned long iterations,
+            void(progress_callback)(Network & network, training_pair_t & current_pair, unsigned long current_iteration)
+        );
 
         void save(const char * path);
     };

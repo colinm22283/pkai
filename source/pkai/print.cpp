@@ -36,9 +36,9 @@ void PKAI::Network::print() {
             for (int j = 0; j < layer_sizes[i] * layer_sizes[i + 1]; j++) {
                 std::cout << _synapses[i][j] << " ";
             }
-        }
 
-        std::cout << "\n";
+            std::cout << "\n";
+        }
     }
 
     for (int i = 0; i < layer_count; i++) delete[] _neurons[i];

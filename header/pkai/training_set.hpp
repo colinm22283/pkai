@@ -59,6 +59,13 @@ namespace PKAI {
         constexpr const float * inputs() { return (const float *) _inputs; }
         constexpr const float * outputs() { return (const float *) _outputs; }
 
+        inline void extract_outputs(float * buf, std::size_t count) {
+            cudaMemcpy(buf, _outputs, count * sizeof(float), cudaMemcpyDeviceToHost);
+        }
+        inline void extract_inputs(float * buf, std::size_t count) {
+            cudaMemcpy(buf, _inputs, count * sizeof(float), cudaMemcpyDeviceToHost);
+        }
+
         inline ~training_pair_t() {
             if (_inputs) cudaFree(_inputs);
             if (_outputs) cudaFree(_outputs);

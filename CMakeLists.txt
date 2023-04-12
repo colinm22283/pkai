@@ -6,7 +6,7 @@ set(CMAKE_CUDA_STANDARD 20)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/)
 
-set(CMAKE_CUDA_FLAGS "-std=c++20 -g -G -O3 -gencode arch=compute_61,code=sm_61")
+set(CMAKE_CUDA_FLAGS "-std=c++20 -g -G -O0 -gencode arch=compute_61,code=sm_61")
 
 find_package(CUDA REQUIRED)
 include_directories(${CUDA_INCLUDE_DIRS})
