@@ -5,7 +5,7 @@
 #include "pkai/network.hpp"
 #include "pkai/training_set.hpp"
 
-constexpr unsigned long training_iterations = 51000;
+constexpr unsigned long training_iterations = 100000;
 constexpr const char * network_path = "networks/cifar10.net";
 constexpr const char * dataset_path = "training_data/cifar10.ts";
 
@@ -26,6 +26,7 @@ int main() {
     check_cuda_error();
 
     std::cout << "Loading network...\n";
+//    PKAI::Network network({ 3072, 3000, 3000, 3000, 1000, 10 });
     PKAI::Network network(network_path);
     check_cuda_error();
 
@@ -49,8 +50,8 @@ int main() {
     std::cout << "Training complete\n";
     printf(
         "Elapsed time: %2.lu:%2.lu:%2.3f\n\n",
-        elapsed / 360000000000 % 60,
-        elapsed / 60000000000 % 60,
+        elapsed / 360000000000UL % 60UL,
+        elapsed / 60000000000UL % 60UL,
         fmodf32((float) elapsed / 1000000000.0f, 60)
     );
     std::cout << "Press enter to continue...\n";

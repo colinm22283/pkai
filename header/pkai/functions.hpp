@@ -23,6 +23,11 @@ namespace PKAI {
         return x / (1 + fabs(x));
     }
     __device__
+    inline float unsigned_fast_sigmoid(float x) {
+        return 0.5f * (x / (1 + abs(x)) + 1);
+    }
+
+    __device__
     inline float fast_sigmoid_prime(float x) {
         return -1 / (x * x + 2 * fabs(x) + 1);
     }

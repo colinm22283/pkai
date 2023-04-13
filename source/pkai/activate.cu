@@ -27,7 +27,8 @@ void activate_k(
             PKAI::neuron(neurons, layer - 1, i);
     }
 
-    neurons[layer][idx] = PKAI::sigmoid(neurons[layer][idx] + biases[layer - 1][idx]);
+//    neurons[layer][idx] = PKAI::sigmoid(neurons[layer][idx] + biases[layer - 1][idx]);
+    neurons[layer][idx] = PKAI::unsigned_fast_sigmoid(neurons[layer][idx] + biases[layer - 1][idx]);
 //    neurons[layer][idx] = PKAI::fast_sigmoid(neurons[layer][idx] + biases[layer - 1][idx]);
 //    neurons[layer][idx] = PKAI::tanh(neurons[layer][idx] + biases[layer - 1][idx]);
 //    neurons[layer][idx] = PKAI::relu(neurons[layer][idx] + biases[layer - 1][idx]);
