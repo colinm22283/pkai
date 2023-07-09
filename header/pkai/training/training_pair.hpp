@@ -16,6 +16,10 @@ namespace PKAI {
           _input_size(in), _output_size(on),
           _input(std::move(inputs)), _output(std::move(outputs)) { }
 
+        inline training_pair_t(FloatType * inputs, FloatType * outputs, nsize_t in, nsize_t on):
+            _input_size(in), _output_size(on),
+            _input(inputs, in), _output(outputs, on) { }
+
         inline training_pair_t(nsize_t __input_size, nsize_t __output_size):
           _input_size(__input_size),
           _output_size(__output_size),

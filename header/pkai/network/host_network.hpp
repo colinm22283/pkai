@@ -13,11 +13,11 @@ namespace PKAI {
     class HostNetwork : public _Network<_host_allocator_t<FloatType>, ActivationFunction, FloatType, true, Config...> {
         using base_t = _Network<_host_allocator_t<FloatType>, ActivationFunction, FloatType, true, Config...>;
 
-        using base_t::input_size;
-        using base_t::backpropagate_recur;
-        using base_t::output_ptr;
-
     public:
+        using base_t::input_size;
+        using base_t::backpropagate_recur; // TODO This too
+        using base_t::output_ptr; // TODO: move to protected
+
         inline void give_input(FloatType * data) {
             std::memcpy(
                 this->in_layer.data,
@@ -37,7 +37,7 @@ namespace PKAI {
             FloatType costs[base_t::static_input_size];
             for (nsize_t i = 0; i < base_t::static_input_size; i++) {
                 FloatType temp = correct[i] - output_ptr()[i];
-                costs[i] = temp * temp * temp;
+                costs[i] = temp;
             }
 
             backpropagate_recur(costs);

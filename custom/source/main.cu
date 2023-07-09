@@ -19,36 +19,106 @@ int main(int argc, const char ** argv) {
 
     std::cout << "START\n";
 
-    PKAI::HostDataset<float> dataset(2, 2);
+    {
+        PKAI::HostDataset<float> dataset(25, 2);
+        dataset.add({
+                        1, 1, 1, 1, 1,
+                        1, 0, 0, 0, 1,
+                        1, 0, 0, 0, 1,
+                        1, 0, 0, 0, 1,
+                        1, 1, 1, 1, 1
+                    }, {1, 0});
+        dataset.add({
+                        1, 1, 1, 0, 0,
+                        1, 0, 1, 0, 0,
+                        1, 0, 1, 0, 0,
+                        1, 0, 1, 0, 0,
+                        1, 1, 1, 0, 0
+                    }, {1, 0});
+        dataset.add({
+                        0, 0, 1, 1, 1,
+                        0, 0, 1, 0, 1,
+                        0, 0, 1, 0, 1,
+                        0, 0, 1, 0, 1,
+                        0, 0, 1, 1, 1
+                    }, {1, 0});
+        dataset.add({
+                        1, 1, 1, 1, 1,
+                        1, 1, 1, 1, 1,
+                        1, 1, 1, 1, 1,
+                        1, 1, 1, 1, 1,
+                        1, 1, 1, 1, 1
+                    }, {0, 1});
+        dataset.add({
+                        1, 0, 1, 1, 1,
+                        1, 0, 1, 0, 0,
+                        1, 0, 1, 0, 0,
+                        0, 0, 1, 1, 1,
+                        1, 1, 1, 1, 1
+                    }, {0, 1});
 
-    dataset.add({ 1, 0 }, { 0, 1 });
-    dataset.add({ 0, 1 }, { 1, 0 });
+        dataset.save_to("training_data/loops.ds");
+    }
+
+    PKAI::HostDataset<float> dataset("training_data/loops.ds");
 
     PKAI::HostNetwork<
         PKAI::ActivationFunction::ReLu,
         float,
-        PKAI::Layer<2>,
+        PKAI::Layer<25>,
+        PKAI::Host::FullyConnected,
+        PKAI::Layer<50>,
         PKAI::Host::FullyConnected,
         PKAI::Layer<2>
     > network;
 
-    float temp_buf[2];
+    float temp_buf[network.output_size()];
 
-    for (int i = 0; i < 10000; i++) {
+    for (int iter = 0; iter < 10000; iter++) {
         const auto & pair = dataset.get_random_pair();
 
-        std::cout << "Input: [ " << pair.input()[0] << ", " << pair.input()[1] << " ]\n";
+        std::cout << "Input: [ ";
+        for (int i = 0; i < network.input_size(); i++) {
+            std::cout << pair.input()[i] << " ";
+        }
+        std::cout << "]\n";
 
         network.give_input(pair.input());
 
         network.activate();
 
         network.copy_output(temp_buf);
-        std::cout << "Output:  [ " << temp_buf[0] << ", " << temp_buf[1] << " ]\n";
-        std::cout << "Correct: [ " << pair.output()[0] << ", " << pair.output()[1] << " ]\n\n";
-
         network.backpropagate(pair.output());
+        std::cout << "Output: [ ";
+        for (int i = 0; i < network.output_size(); i++) {
+            std::cout << network.output_ptr()[i] << " ";
+        }
+        std::cout << "]\n";
+        std::cout << "Correct: [ ";
+        for (int i = 0; i < network.output_size(); i++) {
+            std::cout << pair.output()[i] << " ";
+        }
+        std::cout << "]\n";
     }
+
+    std::cout << "Giving unique input...\n";
+
+    float test_in[] = {
+        0.5, 0.5, 0.5, 0, 0,
+        0.5, 0,   0.5, 0, 0,
+        0.5, 0,   0.5, 0, 0,
+        0.5, 0,   0.5, 0, 0,
+        0.5, 0.5, 0.5, 0, 0
+    };
+
+    network.give_input(test_in);
+    network.activate();
+    network.copy_output(temp_buf);
+    std::cout << "Output: [ ";
+    for (int i = 0; i < network.output_size(); i++) {
+        std::cout << network.output_ptr()[i] << " ";
+    }
+    std::cout << "]\n";
 
     std::cout << "DONE!\n";
 

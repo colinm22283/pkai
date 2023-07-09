@@ -33,6 +33,7 @@ namespace PKAI {
 
     public:
         [[nodiscard]] consteval nsize_t input_size() const noexcept { return InLayer::size; }
+        [[nodiscard]] consteval nsize_t output_size() const noexcept { return static_output_size; }
 
         inline void activate() {
             connection.activate(in_layer.data, out_layer.data);
@@ -62,6 +63,7 @@ namespace PKAI {
 
     public:
         [[nodiscard]] consteval nsize_t input_size() const noexcept { return InLayer::size; }
+        [[nodiscard]] consteval nsize_t output_size() const noexcept { return static_output_size; }
 
         inline void activate() {
             connection.activate(in_layer.data, out_layer.data);
@@ -85,7 +87,7 @@ namespace PKAI {
 
         // backpropagate this layer and the next and returns the cost
         inline FloatType * backpropagate_recur(FloatType * costs) {
-            return connection.backpropagate(in_layer.data, out_layer.data, costs);
+            return connection.backpropagate(in_layer.data, out_layer.data, next.backpropagate_recur(costs));
         }
 
         inline void activate() {
@@ -104,8 +106,6 @@ namespace PKAI {
         static constexpr nsize_t static_output_size = OutLayer::size;
 
         inline FloatType * output_ptr() { return out_layer.data; }
-
-        [[nodiscard]] consteval nsize_t input_size() const noexcept { return InLayer::size; }
 
         // backpropagate this layer and the next and returns the cost
         inline FloatType * backpropagate_recur(FloatType * costs) {

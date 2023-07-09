@@ -11,6 +11,9 @@ namespace PKAI {
 
             for (nsize_t i = 0; i < n; i++) data[i] = temp[i];
         }
+        inline _host_allocator_t(T * _data, nsize_t n): data(new T[n]) {
+            for (nsize_t i = 0; i < n; i++) data[i] = _data[i];
+        }
         explicit inline _host_allocator_t(nsize_t size): data(new T[size]) { }
         inline ~_host_allocator_t() { delete[] data; }
 
