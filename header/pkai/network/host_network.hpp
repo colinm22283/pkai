@@ -6,7 +6,7 @@
 #include <pkai/common.hpp>
 #include <pkai/allocators.hpp>
 
-#include <device/heap.hpp>
+//#include <device/heap.hpp>
 
 namespace PKAI {
     template<typename ActivationFunction, typename FloatType, typename... Config>
@@ -35,12 +35,23 @@ namespace PKAI {
 
         inline void backpropagate(FloatType * correct) {
             FloatType costs[base_t::static_input_size];
-            for (nsize_t i = 0; i < base_t::static_input_size; i++) {
-                FloatType temp = correct[i] - output_ptr()[i];
-                costs[i] = temp;
+            for (nsize_t i = 0; i < base_t::static_output_size; i++) {
+                FloatType temp = output_ptr()[i] - correct[i];
+                costs[i] = temp / base_t::static_output_size;
             }
 
             backpropagate_recur(costs);
+        }
+
+        inline FloatType average_cost(FloatType * correct) {
+            FloatType sum = 0;
+
+            for (nsize_t i = 0; i < base_t::static_output_size; i++) {
+                FloatType temp = correct[i] - output_ptr()[i];
+                sum += temp * temp;
+            }
+
+            return sum / base_t::static_output_size;
         }
     };
 }

@@ -47,6 +47,8 @@ namespace PKAI {
             pairs.emplace_back(inputs, outputs, _input_size, _output_size);
         }
 
+        [[nodiscard]] inline std::size_t size() const noexcept { return pairs.size(); }
+
         inline training_pair_t<Allocator, FloatType> const & get_random_pair() const noexcept {
             std::uniform_int_distribution<std::size_t> distro(0, (int) pairs.size() - 1);
 

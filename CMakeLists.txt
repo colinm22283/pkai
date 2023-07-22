@@ -6,7 +6,8 @@
 
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/)
 
-    set(CMAKE_CUDA_FLAGS "-std=c++20 --extended-lambda -g -G -O0 -gencode arch=compute_61,code=sm_61")
+    #  -gencode arch=compute_61,code=sm_61
+    set(CMAKE_CUDA_FLAGS "-std=c++20 --extended-lambda -O3")
 
     find_package(CUDA REQUIRED)
     include_directories(${CUDA_INCLUDE_DIRS})
