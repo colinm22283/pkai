@@ -1,18 +1,20 @@
 #pragma once
 
-#include "../../../config.hpp"
+#include <cuda_runtime.h>
 
-namespace PKAI::Connection::Host {
+#include <pkai/device/_device_check.hpp>
+
+#include <pkai/universal/config.hpp>
+
+namespace PKAI::Connection {
     struct FullyConnected {
         static constexpr bool _is_connection_ = true;
-        static constexpr bool _is_host = true;
-        static constexpr bool _is_device = false;
 
         template<typename FloatType, int_t from_size, int_t to_size>
         struct Config {
             static constexpr int_t allocation_size = from_size * to_size + to_size;
 
-            static inline void activate_host(FloatType * const & in, FloatType * const & out, FloatType * const & allocation) {
+            __device__ static inline void activate(FloatType * const & in, FloatType * const & out, FloatType * const & allocation) {
                 for (int i = 0; i < to_size; i++) {
                     FloatType sum = 0;
 

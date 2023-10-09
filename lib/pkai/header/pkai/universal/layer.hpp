@@ -1,6 +1,12 @@
 #pragma once
 
-#include "../config.hpp"
+#ifndef PKAI_HOST
+#ifndef PKAI_DEVICE
+#error PKAI_HOST or PKAI_DEVICE must be defined
+#endif
+#endif
+
+#include "config.hpp"
 
 namespace PKAI {
     template<int_t _size>

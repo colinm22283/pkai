@@ -1,23 +1,45 @@
 #include <iostream>
 
-#include <pkai/construction/network_builder.hpp>
-#include <pkai/construction/connection/host/fully_connected.hpp>
-#include <pkai/construction/allocators/host_allocator.hpp>
+#include <pkai/host.hpp>
+#include <pkai/universal/connection/fully_connected.hpp>
+
+#include <pkai/universal/activation_function/step.hpp>
+#include <pkai/universal/activation_function/linear.hpp>
+#include <pkai/universal/activation_function/relu.hpp>
+#include <pkai/universal/activation_function/sigmoid.hpp>
 
 int main() {
-    PKAI::NetworkBuilder
-        ::DefineAllocator<PKAI::Allocators::HostAllocator>
+    using namespace PKAI;
+    using namespace Connection;
+    using namespace ActivationFunction;
+
+    using Builder = NetworkBuilder
         ::DefineFloatType<float>
         ::AddLayer<2>
-        ::AddConnection<PKAI::Connection::Host::FullyConnected>
+        ::AddConnection<FullyConnected<Sigmoid>>
         ::AddLayer<2>
-        ::Build network;
+        ::AddConnection<FullyConnected<Sigmoid>>
+        ::AddLayer<1>;
 
-    float test[2] = { 1, 0 };
+    Builder::Network network;
 
-    network.set_inputs(test);
-    network.activate();
-    network.get_outputs(test);
+    Builder::Dataset dataset("xor.ds");
 
-    std::cout << "Out: " << test[0] << ", " << test[1] << "\n";
+    network.train<10000>(dataset, 1000000);
+
+    std::cout << "Training complete!\n\n";
+
+    for (PKAI::int_t i = 0; i < dataset.size(); i++) {
+        auto & set = dataset.get(i);
+
+        float temp[1];
+
+        network.set_inputs(set.in());
+        network.activate();
+        network.get_outputs(temp);
+
+        std::cout << "In:      " << set.in()[0] << ", " << set.in()[1] << "\n";
+        std::cout << "Out:     " << temp[0] << "\n";
+        std::cout << "Correct: " << set.out()[0] << "\n";
+    }
 }

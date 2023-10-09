@@ -27,6 +27,7 @@ list(FILTER CU_SOURCES EXCLUDE REGEX ".*cmake-build-release.*")
 add_subdirectory(lib)
 
 add_executable(pkai-testing ${CPP_SOURCES} ${CU_SOURCES})
+target_compile_options(pkai-testing PRIVATE -O3)
 
 set_target_properties(pkai-testing PROPERTIES
         CUDA_SEPARABLE_COMPILATION ON)
