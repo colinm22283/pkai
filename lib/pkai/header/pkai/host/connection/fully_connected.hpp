@@ -45,14 +45,12 @@ namespace PKAI::Connection {
                     FloatType move_factor = cost_derivs[i] * trans_deriv;
 
                     for (int j = 0; j < from_size; j++) {
-                        FloatType weight_change = move_factor * in[j];
+                        if constexpr (!is_end) next_costs[j] += move_factor * allocation[i * from_size + j];
 
-                        if constexpr (!is_end) next_costs[j] += weight_change * allocation[i * from_size + j];
-
-                        allocation[i * from_size + j] -= 0.1 * weight_change;
+                        allocation[i * from_size + j] -= 0.005 * move_factor * in[j];
                     }
 
-                    allocation[from_size * to_size + i] -= 0.1 * move_factor;
+                    allocation[from_size * to_size + i] -= 0.005 * move_factor;
                 }
             }
         };

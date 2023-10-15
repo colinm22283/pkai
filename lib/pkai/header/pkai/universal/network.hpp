@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 #include <pkai/universal/config.hpp>
 #include <pkai/universal/dataset.hpp>
 
@@ -14,7 +16,7 @@ namespace PKAI {
         template<typename prev_t, typename IL, typename C, typename OL, typename... Rest>
         struct layer_container_t {
             Allocator::template Instance<FloatType, IL::size> layer_in_allocation;
-            Allocator::template Instance<FloatType, IL::size> layer_out_allocation;
+            Allocator::template Instance<FloatType, OL::size> layer_out_allocation;
 
             layer_container_t<
                 layer_container_t<prev_t, IL, C, OL, Rest...>,
@@ -35,6 +37,7 @@ namespace PKAI {
             [[nodiscard]] FloatType * out_neurons_trans() noexcept { return next.in_neurons(); }
 
             inline auto & last_layer() { return next.last_layer(); }
+            static constexpr bool is_last = false;
 
             using Connection = C::template Config<FloatType, in_size, out_size>;
             Allocator::template Instance<FloatType, Connection::allocation_size> connection_allocation;
@@ -64,8 +67,8 @@ namespace PKAI {
         template<typename prev_t, typename IL, typename C, typename OL>
         struct layer_container_t<prev_t, IL, C, OL> {
             Allocator::template Instance<FloatType, IL::size> layer_in_allocation;
-            Allocator::template Instance<FloatType, IL::size> layer_out_allocation;
-            Allocator::template Instance<FloatType, IL::size> layer_out_trans_allocation;
+            Allocator::template Instance<FloatType, OL::size> layer_out_allocation;
+            Allocator::template Instance<FloatType, OL::size> layer_out_trans_allocation;
 
             prev_t & prev;
             explicit inline layer_container_t(prev_t & _prev): prev(_prev) { }
@@ -77,6 +80,7 @@ namespace PKAI {
             [[nodiscard]] FloatType * out_neurons_trans() noexcept { return layer_out_trans_allocation.data(); }
 
             inline auto & last_layer() { return *this; }
+            static constexpr bool is_last = true;
 
             using Connection = C::template Config<FloatType, in_size, out_size>;
             Allocator::template Instance<FloatType, Connection::allocation_size> connection_allocation;
@@ -124,6 +128,7 @@ namespace PKAI {
             [[nodiscard]] FloatType * out_neurons_trans() noexcept { return next.in_neurons(); }
 
             inline auto & last_layer() { return next.last_layer(); }
+            static constexpr bool is_last = false;
 
             using Connection = C::template Config<FloatType, in_size, out_size>;
             Allocator::template Instance<FloatType, Connection::allocation_size> connection_allocation;
@@ -151,8 +156,8 @@ namespace PKAI {
         template<typename IL, typename C, typename OL>
         struct layer_container_base_t<IL, C, OL> {
             Allocator::template Instance<FloatType, IL::size> layer_in_allocation;
-            Allocator::template Instance<FloatType, IL::size> layer_out_allocation;
-            Allocator::template Instance<FloatType, IL::size> layer_out_trans_allocation;
+            Allocator::template Instance<FloatType, OL::size> layer_out_allocation;
+            Allocator::template Instance<FloatType, OL::size> layer_out_trans_allocation;
 
             static constexpr int_t in_size = IL::size;
             [[nodiscard]] FloatType * in_neurons() noexcept { return layer_in_allocation.data(); }
@@ -161,6 +166,7 @@ namespace PKAI {
             [[nodiscard]] FloatType * out_neurons_trans() noexcept { return layer_out_trans_allocation.data(); }
 
             inline auto & last_layer() { return *this; }
+            static constexpr bool is_last = true;
 
             using Connection = C::template Config<FloatType, in_size, out_size>;
             Allocator::template Instance<FloatType, Connection::allocation_size> connection_allocation;
@@ -170,7 +176,7 @@ namespace PKAI {
                 Connection::activate(in_neurons(), out_neurons(), out_neurons_trans(), connection_allocation.data());
             }
             inline void learn(FloatType * costs) {
-                Connection::template learn<false>(in_neurons(), out_neurons(), out_neurons_trans(), connection_allocation.data(), costs, nullptr);
+                Connection::template learn<true>(in_neurons(), out_neurons(), out_neurons_trans(), connection_allocation.data(), costs, nullptr);
             }
 #endif
 #ifdef PKAI_DEVICE
@@ -203,7 +209,7 @@ namespace PKAI {
             FloatType cost_derivs[layers.last_layer().out_size];
 
             for (int i = 0; i < layers.last_layer().out_size; i++) {
-                cost_derivs[i] = 2 * (layers.last_layer().out_neurons_trans()[i] - correct[i]);
+                cost_derivs[i] = 2 * (layers.last_layer().out_neurons_trans()[i] - correct[i]) / layers.last_layer().out_size;
             }
 
             layers.last_layer().learn(cost_derivs);
@@ -211,15 +217,15 @@ namespace PKAI {
         template<int progress_report_interval = 0>
         inline void train(auto & dataset, int_t iterations) {
             for (int i = 0; i < iterations; i++) {
-                if constexpr (progress_report_interval != 0) if (iterations % progress_report_interval == 0) {
-                    std::cout << i << "/" << iterations << ": " << total_cost(dataset) << "\n";
-                }
-
                 auto & set = dataset[i % dataset.size()];
 
                 set_inputs(set.in());
                 activate();
                 learn(set.out());
+
+                if constexpr (progress_report_interval != 0) if (i % progress_report_interval == 0) {
+                    std::cout << i << "/" << iterations << ", cost: " << total_cost(dataset) << "\n";
+                }
             }
         }
 
@@ -244,6 +250,14 @@ namespace PKAI {
 
             return cost_sum / dataset.size();
         }
+
+        inline int_t greatest_output() {
+            int_t index = 0;
+            for (int i = 1; i < layers.last_layer().out_size; i++) {
+                if (layers.last_layer().out_neurons_trans()[i] > layers.last_layer().out_neurons_trans()[index]) index = i;
+            }
+            return index;
+        }
 #endif
 #ifdef PKAI_DEVICE
     protected:
@@ -261,6 +275,40 @@ namespace PKAI {
 
         }
 #endif
+
+        template<typename T>
+        static inline void save_recur(std::ofstream & fs, T & layer) {
+            FloatType * temp = new FloatType[layer.connection_allocation.size()];
+
+            layer.connection_allocation.get_data(temp, layer.connection_allocation.size());
+            fs.write((char *) temp, layer.connection_allocation.size() * sizeof(FloatType));
+
+            if constexpr (!T::is_last) save_recur(fs, layer.next);
+
+            delete[] temp;
+        }
+        inline void save(const char * path) {
+            std::ofstream fs(path, std::ofstream::trunc);
+            save_recur(fs, layers);
+        }
+        template<typename T>
+        static inline void load_recur(std::ifstream & fs, T & layer) {
+            FloatType * temp = new FloatType[layer.connection_allocation.size()];
+
+            fs.read((char *) temp, layer.connection_allocation.size() * sizeof(FloatType));
+            layer.connection_allocation.set_data(temp, layer.connection_allocation.size());
+
+            if constexpr (!T::is_last) load_recur(fs, layer.next);
+
+            delete[] temp;
+        }
+        inline void load(const char * path) {
+            std::ifstream fs(path);
+            load_recur(fs, layers);
+        }
+
+        explicit inline Network() = default;
+        explicit inline Network(const char * path) { load(path); }
     };
 }
 

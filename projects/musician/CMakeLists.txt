@@ -1,0 +1,1 @@
+add_project(musician main.cpp)

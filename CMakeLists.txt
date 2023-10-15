@@ -26,10 +26,14 @@ list(FILTER CU_SOURCES EXCLUDE REGEX ".*cmake-build-release.*")
 
 add_subdirectory(lib)
 
-add_executable(pkai-testing ${CPP_SOURCES} ${CU_SOURCES})
-target_compile_options(pkai-testing PRIVATE -O3)
+function(add_project name sources)
+    file(MAKE_DIRECTORY "${PROJECT_SOURCE_DIR}/bin/${name}/")
 
-set_target_properties(pkai-testing PROPERTIES
-        CUDA_SEPARABLE_COMPILATION ON)
+    add_executable(${name} ${sources})
+    target_compile_options(${name} PRIVATE -O3 -flto)
+    set_target_properties(${name} PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+    set_target_properties(${name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin/${name}/")
+    target_link_libraries(${name} pkai ${CUDA_LIBRARIES})
+endfunction()
 
-target_link_libraries(pkai-testing pkai ${CUDA_LIBRARIES})
+add_subdirectory(projects)

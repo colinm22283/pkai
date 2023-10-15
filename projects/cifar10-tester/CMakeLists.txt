@@ -1,0 +1,1 @@
+add_project(cifar10-tester main.cpp)

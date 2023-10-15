@@ -1,2 +1,3 @@
-/bin/pkai
+/bin/*
 /cmake-build-debug/
+/cmake-build-release/

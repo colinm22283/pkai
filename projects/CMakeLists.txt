@@ -1,0 +1,5 @@
+add_subdirectory(xor)
+add_subdirectory(cifar10)
+add_subdirectory(cifar10-tester)
+add_subdirectory(musician)
+add_subdirectory(pklm)

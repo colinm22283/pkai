@@ -15,7 +15,7 @@ namespace PKAI {
             T _data[n];
 
             std::default_random_engine engine;
-            std::uniform_real_distribution<float> distro = std::uniform_real_distribution<float>(0.1, 0.9);
+            std::uniform_real_distribution<float> distro = std::uniform_real_distribution<float>(0.0001, 0.001);
 
         public:
             inline Instance() noexcept {
@@ -23,7 +23,7 @@ namespace PKAI {
             }
 
             inline T * data() noexcept { return _data; }
-            [[nodiscard]] consteval int_t size() const noexcept { return n; }
+            [[nodiscard]] inline int_t size() const noexcept { return n; }
 
             inline void set_data(const T * source, int_t count) noexcept {
                 std::memcpy(_data, source, count * sizeof(T));

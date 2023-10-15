@@ -1,5 +1,5 @@
 #pragma once
 
 namespace PKAI {
-    using int_t = int;
+    using int_t = long;
 }

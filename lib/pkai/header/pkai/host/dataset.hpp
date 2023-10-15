@@ -3,6 +3,7 @@
 #include <vector>
 #include <fstream>
 #include <exception>
+#include <random>
 
 #include <pkai/universal/config.hpp>
 
@@ -59,6 +60,11 @@ namespace PKAI {
 
         [[nodiscard]] inline int_t size() const noexcept { return data.size(); }
         inline IOSet & get(int_t index) noexcept { return data[index]; }
+        inline IOSet & get_random(int seed) noexcept {
+            std::default_random_engine engine(seed);
+            std::uniform_int_distribution distro(0, size() - 1);
+            return data[distro(engine)];
+        }
         inline IOSet & operator[](int_t index) noexcept { return data[index]; }
 
         template<int_t ni, int_t no>
@@ -66,9 +72,13 @@ namespace PKAI {
             data.emplace_back(std::move(in), std::move(out));
             return *this;
         }
+        inline auto & push_set(FloatType * in, FloatType * out) {
+            data.emplace_back(in, out);
+            return *this;
+        }
 
         inline void save(const char * path) noexcept {
-            std::ofstream fs(path);
+            std::ofstream fs(path, std::ofstream::trunc);
 
             uint32_t size = data.size();
             fs.write((char *) &size, sizeof(uint32_t));
