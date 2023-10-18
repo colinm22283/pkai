@@ -1,0 +1,1 @@
+add_project(device_test main.cpp)
