@@ -13,12 +13,14 @@ namespace PKLM {
         using Builder = PKAI::NetworkBuilder
             ::DefineFloatType<float>
             ::AddLayer<256 * letter_categories>
+//            ::AddConnection<PKAI::Connection::FullyConnected<PKAI::ActivationFunction::ReLu>>
+//            ::AddLayer<2000>
+//            ::AddConnection<PKAI::Connection::FullyConnected<PKAI::ActivationFunction::ReLu>>
+//            ::AddLayer<2000>
             ::AddConnection<PKAI::Connection::FullyConnected<PKAI::ActivationFunction::ReLu>>
-            ::AddLayer<2000>
+            ::AddLayer<400>
             ::AddConnection<PKAI::Connection::FullyConnected<PKAI::ActivationFunction::ReLu>>
-            ::AddLayer<2000>
-            ::AddConnection<PKAI::Connection::FullyConnected<PKAI::ActivationFunction::ReLu>>
-            ::AddLayer<2000>
+            ::AddLayer<400>
             ::AddConnection<PKAI::Connection::FullyConnected<PKAI::ActivationFunction::ReLu>>
             ::AddLayer<256 * letter_categories>;
 
@@ -27,13 +29,14 @@ namespace PKLM {
 
         inline void give_string(const char * str) {
             float input[256 * letter_categories] = { 0 };
+            std::memset(input, 0, 256 * letter_categories * sizeof(float));
 
-            for (int i = 0; str[i] != '\0'; i++) {
-                for (int j = 0; j < letter_categories; j++) {
-                    if (str[i] == ' ') input[i * letter_categories + j] = j == 26;
-                    else input[i * letter_categories + j] = j == str[i] - 65;
-                }
+            int i;
+            for (i = 0; str[i] != '\0'; i++) {
+                if (str[i] == ' ') { input[i * letter_categories + 26] = 1.0f; }
+                else input[i * letter_categories + str[i] - 65] = 1.0f;
             }
+            input[i * letter_categories + 27] = 1.0f;
 
             network.set_inputs(input);
         }
@@ -47,6 +50,7 @@ namespace PKLM {
                 int largest = 0;
                 for (int j = 1; j < letter_categories; j++) if (output[i + j] > output[i + largest]) largest = j;
                 if (largest == 26) out += ' ';
+                else if (largest == 27) break;
                 else out += (char) (largest + 65);
             }
 
@@ -57,23 +61,25 @@ namespace PKLM {
         inline void give_data(const char * in, const char * expected) {
             float input[256 * letter_categories] = { 0 };
             float output[256 * letter_categories] = { 0 };
+            std::memset(input, 0, 256 * letter_categories * sizeof(float));
+            std::memset(output, 0, 256 * letter_categories * sizeof(float));
 
             {
-                for (int i = 0; in[i] != '\0'; i++) {
-                    for (int j = 0; j < letter_categories; j++) {
-                        if (in[i] == ' ') { if (j == 26) input[i * letter_categories + j] = 1.0f; }
-                        else if (j == in[i] - 65) input[i * letter_categories + j] = 1.0f;
-                    }
+                int i;
+                for (i = 0; in[i] != '\0'; i++) {
+                    if (in[i] == ' ') input[i * letter_categories + 26] = 1.0f;
+                    else input[i * letter_categories + in[i] - 65] = 1.0f;
                 }
+                input[i * letter_categories + 27] = 1.0f;
             }
 
             {
-                for (int i = 0; expected[i] != '\0'; i++) {
-                    for (int j = 0; j < letter_categories; j++) {
-                        if (in[i] == ' ') { if (j == 26) input[i * letter_categories + j] = 1.0f; }
-                        else if (j == expected[i] - 65) output[i * letter_categories + j] = 1.0f;
-                    }
+                int i;
+                for (i = 0; expected[i] != '\0'; i++) {
+                    if (expected[i] == ' ') output[i * letter_categories + 26] = 1.0f;
+                    else output[i * letter_categories + expected[i] - 65] = 1.0f;
                 }
+                output[i * letter_categories + 27] = 1.0f;
             }
 
             dataset.push_set(input, output);
@@ -85,8 +91,8 @@ namespace PKLM {
             return get_string();
         }
 
-        inline void train() {
-            network.template train<10>(dataset, 1000);
+        inline void train(PKAI::int_t iterations) {
+            network.template train<10>(dataset, iterations);
         }
         inline float cost() {
             return network.total_cost(dataset);

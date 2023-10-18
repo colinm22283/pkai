@@ -14,10 +14,12 @@ std::default_random_engine engine(149324023);
 std::uniform_int_distribution distro(0, 50000 - 1);
 
 inline float print_all(auto & dataset, auto & network) {
+    constexpr int sample_size = 20;
+
     int correct_count = 0;
     float cost;
 
-    for (PKAI::int_t i = 0; i < std::min(dataset.size(), (PKAI::int_t) 10); i++) {
+    for (PKAI::int_t i = 0; i < std::min(dataset.size(), (PKAI::int_t) sample_size); i++) {
         auto & set = dataset.get(distro(engine));
 
         float temp[set.out_size()];
@@ -26,9 +28,9 @@ inline float print_all(auto & dataset, auto & network) {
         network.activate();
         network.get_outputs(temp);
 
-        std::cout << "In: " << set.in()[0];
-        for (int j = 1; j < set.in_size(); j++) std::cout << ", " << set.in()[j];
-        std::cout << "\n";
+//        std::cout << "In: " << set.in()[0];
+//        for (int j = 1; j < set.in_size(); j++) std::cout << ", " << set.in()[j];
+//        std::cout << "\n";
         std::cout << "Out: " << temp[0];
         for (int j = 1; j < set.out_size(); j++) std::cout << ", " << temp[j];
         std::cout << "\n";
@@ -48,14 +50,14 @@ inline float print_all(auto & dataset, auto & network) {
             correct_count++;
         }
         else std::cout << "Incorrect :(\n";
-        std::cout << "\n";
+        std::cout << "\n\n";
 
         cost += temp2;
     }
 
-    std::cout << "Accuracy: " << (correct_count * 100 / std::min(dataset.size(), (PKAI::int_t) 10)) << "%\n";
+    std::cout << "Accuracy: " << (correct_count * 100 / std::min(dataset.size(), (PKAI::int_t) sample_size)) << "%\n";
 
-    return cost / std::min(dataset.size(), (PKAI::int_t) 10);
+    return cost / std::min(dataset.size(), (PKAI::int_t) sample_size);
 }
 
 inline void test_image(auto & network, const char * path) {

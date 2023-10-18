@@ -14,7 +14,7 @@ namespace PKAI::Connection {
         struct Config {
             static constexpr int_t allocation_size = from_size * to_size + to_size;
 
-            __device__ static inline void activate(FloatType * const & in, FloatType * const & out, FloatType * const & allocation) {
+            __device__ static inline void activate(FloatType * in, FloatType * out, FloatType * allocation) {
                 for (int i = 0; i < to_size; i++) {
                     FloatType sum = 0;
 

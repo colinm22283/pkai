@@ -14,12 +14,15 @@ int main() {
         ::AddConnection<FullyConnected<ReLu>>
         ::AddLayer<20>
         ::AddConnection<FullyConnected<ReLu>>
-        ::AddLayer<4>;
+        ::AddLayer<8>;
 
     static Builder::Network network;
     static Builder::Dataset dataset;
 
-
+    dataset.emplace_set({
+        {1, 0, 0, 0, 0, 0, 0, 0},
+        {}
+    });
 
     network.train<1000>(dataset, 1000000);
 

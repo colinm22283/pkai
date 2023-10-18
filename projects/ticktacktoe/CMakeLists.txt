@@ -1,0 +1,1 @@
+add_project(ticktacktoe "main.cpp;game.cpp")
