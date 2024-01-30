@@ -17,7 +17,7 @@ int main() {
         ::DefineFloatType<float>
         ::AddLayer<2>
         ::AddConnection<FullyConnected<Sigmoid>>
-        ::AddLayer<2>
+        ::AddLayer<8>
         ::AddConnection<FullyConnected<Sigmoid>>
         ::AddLayer<1>;
 

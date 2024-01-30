@@ -47,10 +47,10 @@ namespace PKAI::Connection {
                     for (int j = 0; j < from_size; j++) {
                         if constexpr (!is_end) next_costs[j] += move_factor * allocation[i * from_size + j];
 
-                        allocation[i * from_size + j] -= 0.9 * move_factor * in[j];
+                        allocation[i * from_size + j] -= 0.01 * move_factor * in[j];
                     }
 
-                    allocation[from_size * to_size + i] -= 0.9 * move_factor;
+                    allocation[from_size * to_size + i] -= 0.01 * move_factor;
                 }
             }
         };

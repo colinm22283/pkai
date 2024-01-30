@@ -86,8 +86,8 @@ namespace PKAI {
         }
 
     public:
-        using Network = decltype(build_network<state, Allocator, FloatType, Data...>())::Build;
-        using Dataset = decltype(build_dataset<state, Allocator, FloatType, Data...>())::Build;
+        using NetworkType = decltype(build_network<state, Allocator, FloatType, Data...>())::Build;
+        using DatasetType = decltype(build_dataset<state, Allocator, FloatType, Data...>())::Build;
 
         template<typename _FloatType> requires(!state.has_float_type)
         using DefineFloatType = _NetworkBuilder<_NetworkBuilderPrivate::network_builder_state_t {

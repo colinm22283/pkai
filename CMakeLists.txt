@@ -9,10 +9,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/bin/)
 #  -gencode arch=compute_61,code=sm_61
 set(CMAKE_CUDA_FLAGS "-std=c++20 --extended-lambda -O3")
 
-find_package(CUDA REQUIRED)
-include_directories(${CUDA_INCLUDE_DIRS})
-
 find_package(CUDAToolkit REQUIRED)
+include_directories(${CUDAToolkit_INCLUDE_DIRS})
 
 include_directories("${PROJECT_SOURCE_DIR}/header/")
 
@@ -33,7 +31,7 @@ function(add_project name sources)
     target_compile_options(${name} PRIVATE -O3 -flto)
     set_target_properties(${name} PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
     set_target_properties(${name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin/${name}/")
-    target_link_libraries(${name} pkai ${CUDA_LIBRARIES})
+    target_link_libraries(${name} pkai ${CUDAToolkit_LIBRARIES})
 endfunction()
 
 add_subdirectory(projects)

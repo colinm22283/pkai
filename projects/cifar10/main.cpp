@@ -94,14 +94,19 @@ int main() {
         ::DefineFloatType<float>
         ::AddLayer<3072>
         ::AddConnection<FullyConnected<ReLu>>
-        ::AddLayer<128>
-        ::AddConnection<FullyConnected<ReLu>>
-        ::AddLayer<32>
+        ::AddLayer<256>
         ::AddConnection<FullyConnected<ReLu>>
         ::AddLayer<10>;
 
-    static Builder::Network network("cifar10.net");
-    static Builder::Dataset dataset("cifar10.ds");
+    static Builder::NetworkType network;
+    static Builder::DatasetType dataset("cifar10.ds");
+
+//    Cifar10::load_datafile(dataset, "data_batch_1.bin");
+//    Cifar10::load_datafile(dataset, "data_batch_2.bin");
+//    Cifar10::load_datafile(dataset, "data_batch_3.bin");
+//    Cifar10::load_datafile(dataset, "data_batch_4.bin");
+//    Cifar10::load_datafile(dataset, "data_batch_5.bin");
+//    dataset.save("cifar10.ds");
 
     std::cout << "Dataset size: " << dataset.size() << "\n";
     std::cout << "Starting training...\n";
