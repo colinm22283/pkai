@@ -90,7 +90,7 @@ int main() {
     using namespace Connection;
     using namespace ActivationFunction;
 
-    using Builder = PKAI::NetworkBuilder
+    using Builder = NetworkBuilder
         ::DefineFloatType<float>
         ::AddLayer<3072>
         ::AddConnection<FullyConnected<ReLu>>
