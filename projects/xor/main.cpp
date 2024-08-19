@@ -21,9 +21,9 @@ int main() {
         ::AddConnection<FullyConnected<Sigmoid>>
         ::AddLayer<1>;
 
-    Builder::Network network;
+    Builder::NetworkType network;
 
-    Builder::Dataset dataset("xor.ds");
+    Builder::DatasetType dataset("xor.ds");
 
     network.train<10000>(dataset, 1000000);
 
